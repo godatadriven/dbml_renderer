@@ -56,9 +56,9 @@
 
 <script setup>
   import { useEditorStore } from '../store/editor'
-  import { computed, onMounted, ref, watch } from 'vue'
-  import VDbChart from './VDbChart/VDbChart'
+  import { computed, ref } from 'vue'
   import { useChartStore } from '../store/chart'
+  import VDbChart from './VDbChart/VDbChart'
   import VDbStructure from './VDbStructure'
 
   const props = defineProps({
@@ -95,13 +95,46 @@
   const maxScale = ref(200)
 
   const applyAutoLayout = () => {
-    // do nothing
-  }
+  const chartStore = useChartStore();
+  
+  // Log when the function starts execution
+  console.log('applyAutoLayout function called');
+
+  // Create a shallow copy to modify and replace
+  const updatedTables = {...chartStore.tables};
+
+  // Log the initial state of tables
+  console.log('Initial table data:', updatedTables);
+
+  let x = 0, y = 0;
+
+  Object.entries(updatedTables).forEach(([tableId, table]) => {
+    // Log the current table being processed
+    console.log(`Updating table ${tableId}`, table);
+
+    // Update the positions directly
+    table.x = x;
+    table.y = y;
+
+    // Adjust the position for the next table based on its width
+    x += table.width + 50; // Adjust the `50` spacing value as needed
+    if (x >= window.innerWidth - table.width) {
+      x = 0;
+      y += table.height + 50; // Adjust vertical spacing
+    }
+
+    // Log the updated position for the table
+    console.log(`Updated position for table ${tableId}:`, { x, y });
+  });
+
+  // Update the state and log the final state
+  chartStore.$patch({ tables: updatedTables });
+  console.log('Final updated table data:', updatedTables);
+};
 
   const applyScaleToFit = () => {
     // do nothing
-  }
-
+  };
 
 </script>
 
