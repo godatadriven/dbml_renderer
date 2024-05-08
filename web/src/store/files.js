@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useEditorStore } from "src/store/editor";
 import { useChartStore } from "src/store/chart";
-
+import { saveAs } from 'file-saver'; // Add the file-saver library if not already included
 import localforage from "localforage";
 
 const fs = localforage.createInstance({
@@ -119,6 +119,33 @@ export const useFilesStore = defineStore("files", {
         this.currentFile = newName;
       }
       this.loadFileList();
+    },
+
+    // New Function: Export files to JSON
+    exportToJson() {
+      fs.keys()
+        .then(keys => {
+          const promises = keys.map(key => fs.getItem(key));
+          return Promise.all(promises);
+        })
+        .then(files => {
+          const json = JSON.stringify(files, null, 2); // Pretty-print JSON
+          const blob = new Blob([json], { type: "application/json" });
+          saveAs(blob, 'dbdiagram-export.json'); // Download the JSON file
+        })
+        .catch(error => console.error('Export error:', error));
+    },
+
+    // New Function: Import files from JSON
+    importFromJson(jsonData) {
+      const files = JSON.parse(jsonData);
+
+      files.forEach(file => {
+        fs.setItem(file.id || `file-${Date.now()}`, file) // Generate a new ID if missing
+          .catch(error => console.error('Import error:', error));
+      });
+
+      this.loadFileList(); // Refresh file list
     }
   }
 });

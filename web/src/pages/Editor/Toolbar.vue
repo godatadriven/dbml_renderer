@@ -50,52 +50,33 @@
       class="bg-secondary q-mx-xs"
       @click="saveFile"
     >
-      <q-icon
-        size="xs"
-        name="save"/>
+      <q-icon size="xs" name="save"/>
     </q-btn>
 
-    <q-btn-dropdown
+    <q-btn
       padding="xs sm"
       size="md"
       color="secondary"
       class="q-mx-xs"
+      @click="exportToJson"
     >
-      <template #label>
-        <q-icon
-          class="q-mr-sm"
-          size="xs"
-          name="file_download"/>
-        Export
-      </template>
+      <q-icon class="q-mr-sm" size="xs" name="file_download"/>
+      Export JSON
+    </q-btn>
 
-      <q-list dense>
-        <q-item v-for="exportOption of exportOptions"
-                :key="exportOption.id"
-                clickable
-                dense
-        >
-          <q-item-section>
-            <q-item-label>{{ exportOption.label }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-btn-dropdown>
-
-    <q-btn-dropdown
+    <q-btn
       padding="xs sm"
       size="md"
       color="secondary"
       class="q-mx-xs"
+      @click="importJson"
     >
-      <template #label>
-        <q-icon
-          class="q-mr-sm"
-          size="xs"
-          name="file_upload"/>
-        Import
-      </template>
-    </q-btn-dropdown>
+      <q-icon class="q-mr-sm" size="xs" name="file_upload"/>
+      Import JSON
+    </q-btn>
+
+    <!-- Add the file input, hidden initially -->
+    <input type="file" accept=".json" ref="fileInput" @change="handleImportJson" style="display:none"/>
   </div>
 
   <q-space/>
@@ -105,18 +86,10 @@
     size="md"
     class="bg-secondary"
     @click.capture="dark = !dark">
-    <q-icon
-      class="q-mr-xs"
-      size="xs"
-      name="dark_mode"/>
-    <q-toggle
-      ref="dark_toggle"
-      class="q-ml-sm no-pointer-events"
-      size="sm"
-      dense
-      color="primary"
-      :model-value="dark"
-      :dark="dark">
+    <q-icon class="q-mr-xs" size="xs" name="dark_mode"/>
+    <q-toggle ref="dark_toggle" class="q-ml-sm no-pointer-events"
+              size="sm" dense color="primary" :model-value="dark"
+              :dark="dark">
     </q-toggle>
   </q-btn>
   <q-btn
@@ -125,10 +98,7 @@
     class="bg-secondary q-mx-xs"
     @click="showPreferencesDialog"
   >
-    <q-icon
-      size="xs"
-      name="settings"
-    />
+    <q-icon size="xs" name="settings"/>
   </q-btn>
 </template>
 
@@ -143,35 +113,32 @@
   const files = useFilesStore()
   const $q = useQuasar()
 
-  const exportOptions = ref([
-    {
-      id: 'json',
-      label: 'Json'
-    },
-    {
-      id: 'mysql',
-      label: 'MySQL'
-    },
-    {
-      id: 'postgres',
-      label: 'PostgreSQL'
-    },
-    {
-      id: 'mssql',
-      label: 'SQL Server'
-    },
-    {
-      id: 'svg',
-      label: 'SVG'
-    },
-    {
-      id: 'png',
-      label: 'PNG'
-    },
-    {
-      id: 'pdf',
-      label: 'PDF'
+  const fileInput = ref(null);
+
+  const exportToJson = () => {
+    files.exportToJson();
+  };
+
+  const importJson = () => {
+    fileInput.value.click();
+  };
+
+  const handleImportJson = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const jsonData = await file.text();
+      files.importFromJson(jsonData);
     }
+  };
+
+  const exportOptions = ref([
+    { id: 'json', label: 'Json' },
+    { id: 'mysql', label: 'MySQL' },
+    { id: 'postgres', label: 'PostgreSQL' },
+    { id: 'mssql', label: 'SQL Server' },
+    { id: 'svg', label: 'SVG' },
+    { id: 'png', label: 'PNG' },
+    { id: 'pdf', label: 'PDF' }
   ])
 
   const dark = computed({
@@ -223,11 +190,8 @@
   }
 
   const showPreferencesDialog = () => {
-    $q.dialog({
-      component: PreferencesDialog
-    })
+    $q.dialog({ component: PreferencesDialog })
   }
-
 </script>
 
 <style scoped>
