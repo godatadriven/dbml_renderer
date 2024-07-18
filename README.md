@@ -6,7 +6,7 @@ An Open Source alternative to dbdiagram.io, aiming to have the same basic featur
 
 ## Live Demo
 
-View the latest master branch at [trudan.github.io/dbdiagram-oss](https://trudan.github.io/dbdiagram-oss/)
+You can run it in docker
 
 
 ## License
